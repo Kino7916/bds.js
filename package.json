@@ -1,12 +1,22 @@
 {
   "name": "bds.js",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A simple interpreter written to simulate and run BDScript Language in JavaScript",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["bdfd", "bdscript", "dbdjs", "dbd", "bds", "aoijs", "aoi", "discordjs", "discord.js"],
+  "keywords": [
+    "bdfd",
+    "bdscript",
+    "dbdjs",
+    "dbd",
+    "bds",
+    "aoijs",
+    "aoi",
+    "discordjs",
+    "discord.js"
+  ],
   "author": "Kino7916",
   "license": "MIT",
   "devDependencies": {
