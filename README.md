@@ -21,7 +21,7 @@ Install bds.js with npm:
 ```sh
 $ npm install bds.js
 ```
-or [getting releases](#) from github
+or [getting releases](https://github.com/Kino7916/bds.js) from github
 
 ## Usage
 ### Creating Environments
@@ -75,4 +75,4 @@ script.run();
 - [ ] Easier access and friendly-code
 
 ## MIT License
-License can be found [here](#)
+License can be found [here](https://github.com/Kino7916/bds.js/blob/master/LICENSE)
