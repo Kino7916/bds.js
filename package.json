@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["bdfd", "bdscript", "dbdjs", "dbd", "bds", "aoijs", "aoi", "discordjs", "discord.js"],
+  "author": "Kino7916",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^18.7.23",
