@@ -38,6 +38,9 @@ class Environment {
         if (! this.cache.has(key)) throw new Error(`'${key}' is not defined!`);
         return this.cache.delete(key);
     };
+    public clear() {
+        return this.cache.clear();
+    }
 }
 
 class ProtectedEnvironment extends Environment {
@@ -63,6 +66,35 @@ class ProtectedMap<K extends any, V extends any> extends Map {
     public lock() {
         this.locked = true;
     }
+    public clear() {
+        this.locked = false;
+        return super.clear();
+    }
+}
+
+class EnvironmentManager extends Environment {
+    protected envs = new Map<string, Environment>();
+    private tracks = new Map<string, string>();
+    private _get(key: string) {
+        if (!this.tracks.has(key)) throw 
+        return this._getFromEnvs(key)
+    }
+    private _getFromEnvs(key: string) {
+        let kenv = "";
+        let fn = "";
+        let err;
+        for (const [k, env] of Array.from(this.envs.entries())) {
+            try {
+                fn = env.get(key);
+                kenv = k;
+            } catch (error) {
+                err = error;
+                continue;
+            }
+        }
+        if (!kenv) throw err;
+        this.tracks.set(fn, kenv);
+    }
 }
 
 // Variables Tools
@@ -70,5 +102,6 @@ class ProtectedMap<K extends any, V extends any> extends Map {
 export {
     Environment,
     ProtectedEnvironment,
-    ProtectedMap
+    ProtectedMap,
+    EnvironmentManager
 }

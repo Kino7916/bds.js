@@ -53,22 +53,22 @@ Create a file with name `index.bds` and write BDScript code
 
 Preparing a Script for the file:
 ```js
-const ReadyScript = require("bds.js").Scripts.FileScript;
+const FileScript = require("bds.js").Scripts.FileScript;
 const Script = new FileScript("./index.bds");
 Script.getFileInput();
 ```
 ### Running Script
 > You can use console.log() to print the output to console
 ```js
-const script = Script.prepare_modules();
+const script = Script.prepareModules();
 script.run();
 ```
 
 ## Goals
 - [x] Usable
-- [ ] Creating Basic Functions
-- [ ] Conditions functions
-- [ ] Arithmetic support
+- [ ] Basic utility Functions
+- [ ] Conditions support
+- [x] Arithmetic support ( Maybe )
 - [ ] Better Lexer and Parsing
 - [ ] Better Interpreter System
 - [ ] Compile-able code to JavaScript

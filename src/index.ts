@@ -6,7 +6,7 @@ import * as Environments from "./Environment";
 import { isRegExp } from "util/types";
 import { inspect } from "util";
 
-class BuiltInEnvironment extends Environments.Environment {
+class BuiltInEnvironment extends Environments.ProtectedEnvironment {
     public constructor() {
         super();
         // Basic Functions
@@ -58,9 +58,7 @@ class BuiltInEnvironment extends Environments.Environment {
         });
 
         // Utility functions
-        this.set("random", (handler) => {
-            return Math.random() * 100;
-        });
+        this.set("random", () => Math.random());
         this.set("print", (handler) => {
             console.log(...handler.waitForArguments(...handler.getArgs(0,handler.getArgLength())));
             return "";
@@ -90,10 +88,18 @@ class BuiltInEnvironment extends Environments.Environment {
                 return text;
             }
         });
+
+        this.cache.lock();
     }
 }
 
-const ReadyEnvironments = {
+class Arithmetics extends Environments.ProtectedEnvironment {
+    public constructor() {
+        this.parent();
+    }
+}
+
+const Modules = {
     BuiltInEnvironment
 }
 
@@ -103,5 +109,5 @@ export {
     Nodes,
     Scripts,
     Environments,
-    ReadyEnvironments
+    Modules
 }
