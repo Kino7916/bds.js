@@ -1,0 +1,16 @@
+{
+  "name": "bds.js",
+  "version": "1.0.0",
+  "description": "A simple interpreter written to simulate and run BDScript Language in JavaScript",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^18.7.18",
+    "typescript": "^4.8.3"
+  }
+}
