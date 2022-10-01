@@ -19,9 +19,9 @@ class Environment {
         return this.cache.get(key);
     };
     public get(key: string) {
-        return this.recursive_get(key);
+        return this._recursiveGet(key);
     }
-    private recursive_get(key: string) {
+    private _recursiveGet(key: string) {
         let env = this as Environment;
         while (true) {
             try {

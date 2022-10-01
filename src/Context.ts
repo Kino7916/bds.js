@@ -4,7 +4,7 @@ import { Script } from "./Script";
 
 class Context {
     public constructor(public script:Script) {};
-    public call_identifier(node: NodeIdentifier) {
+    public _callIdentifier(node: NodeIdentifier) {
         const fn = this.script.env.get(node.value);
         if (typeof fn === "function") {
             const handler = new FnHandler(node, this);

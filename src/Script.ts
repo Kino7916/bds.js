@@ -17,9 +17,9 @@ class FileScript {
         if (! fs.statSync(this.fileName).isFile()) throw new Error("path is not file!");
         this.input = fs.readFileSync(this.fileName, {encoding: "utf8"});
     }
-    public prepare_modules(parentEnv?: Environment) {
+    public prepareModules(parentEnv?: Environment) {
         const script = new Script(this.fileName, this.input, parentEnv);
-        return script.prepare_modules();
+        return script.prepareModules();
     }
 
     private _read_ext_bds() {};
@@ -33,7 +33,7 @@ class Script {
     private parser: Parser;
     public constructor(public fileName: string, public input: string, public parentEnv?: Environment) {};
 
-    public prepare_modules() {
+    public prepareModules() {
         this.env = new Environment(this.parentEnv);
         this.context = new Context(this);
         this.lex = new Lexer(this.input);

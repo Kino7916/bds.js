@@ -17,7 +17,7 @@ abstract class NodeToken {
 abstract class NodeWChildren extends NodeToken {
     public children = new Map<number, NodeToken>();
     public constructor() {super()}
-    public add_child(node: NodeToken) {
+    public _addChild(node: NodeToken) {
         this.children.set(this.children.size, node);
     }
 }
@@ -41,9 +41,9 @@ class NodeArgument extends NodeWChildren {
             const node = arr.shift();
             values.push(node.visit(ctx));
         }
-        return this.value_return(values)
+        return this._valueReturn(values)
     }
-    public value_return(values: any[]) {
+    public _valueReturn(values: any[]) {
         if (values.length > 1) {
             return values.reduce((pv, v) => {
                 if (!pv) return v;
@@ -67,7 +67,7 @@ class NodeArgument extends NodeWChildren {
 class NodeIdentifier extends NodeWChildren {
     public constructor(public value: string) {super()}
     public visit(ctx: Context) {
-        return ctx.call_identifier(this);
+        return ctx._callIdentifier(this);
     }
 }
 
@@ -80,10 +80,10 @@ class NodeProgram extends NodeWChildren {
             const node = arr.shift();
             values.push(node.visit(ctx))
         }
-        return this.value_return(values);
+        return this._valueReturn(values);
     };
 
-    public value_return(values: any[]) {
+    public _valueReturn(values: any[]) {
         if (values.length > 1) {
             return values.reduce((pv, v) => {
                 if (!pv) return v;

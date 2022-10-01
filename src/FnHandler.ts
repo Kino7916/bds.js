@@ -12,7 +12,7 @@ class FnHandler {
         return this.ctx.script.env;
     }
     public callIdentifier(name: string) {
-        return this.ctx.call_identifier(new NodeIdentifier(name));
+        return this.ctx._callIdentifier(new NodeIdentifier(name));
     }
     public waitForArguments(...args: NodeToken[]) {
         let i = 0;
