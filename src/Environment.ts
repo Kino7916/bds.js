@@ -14,7 +14,7 @@ class Environment {
         if (/[^a-z_0-9]/i.test(key)) throw new Error(`invalid key '${key}', should only contain letters and/or underscore '_'`);
         this.cache.set(key, value);
     };
-    private _get(key: string) {
+    public _get(key: string) {
         if (! this.cache.has(key)) throw new Error(`'${key}' is not defined!`);
         return this.cache.get(key);
     };
@@ -75,14 +75,25 @@ class ProtectedMap<K extends any, V extends any> extends Map {
 class EnvironmentManager extends Environment {
     protected envs = new Map<string, Environment>();
     private tracks = new Map<string, string>();
-    private _get(key: string) {
-        if (!this.tracks.has(key)) throw 
+    public constructor() {super()};
+    private _getEnv(key: string) {
+        if (this.tracks.has(key)) return this.envs.get(this.tracks.get(key));
         return this._getFromEnvs(key)
+    }
+    public _get(key: string) {
+        if (!this.cache.has(key) && this.envs.size > 0) {
+            return this._getEnv(key).get(key);
+        }
+        return this.cache.get(key);
+    };
+    public get(key: string) {
+        return this._get(key);
     }
     private _getFromEnvs(key: string) {
         let kenv = "";
         let fn = "";
         let err;
+        console.log(this.envs)
         for (const [k, env] of Array.from(this.envs.entries())) {
             try {
                 fn = env.get(key);
@@ -94,6 +105,20 @@ class EnvironmentManager extends Environment {
         }
         if (!kenv) throw err;
         this.tracks.set(fn, kenv);
+        return this.envs.get(kenv);
+    }
+    public addEnv(name: string, env: Environment) {
+        if (typeof name !== "string" || /^[\s]+/.test(name)) throw new Error("name must be not empty and typeof string!");
+        if (! (env instanceof Environment)) throw new Error("env must be instanceof Environment!");
+        if (this.envs.has(name)) throw new Error("Environment with name already exist!");
+        this.envs.set(name, env);
+        return this;
+    }
+    public getEnv(name: string) {
+        return this.envs.get(name);
+    }
+    public removeEnv(name: string) {
+        return this.envs.delete(name);
     }
 }
 

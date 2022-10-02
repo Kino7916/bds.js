@@ -2,8 +2,9 @@ import { Context } from "./Context";
 import { NodeArgument, NodeIdentifier, NodeToken } from "./Nodes";
 
 class FnHandler {
+    public hasArgs = false;
     public constructor(private node: NodeIdentifier, private ctx: Context) {
-        
+        if (this.node.children.size > 0) this.hasArgs = true;
     }
     public getArgLength() {
         return this.node.children.size;

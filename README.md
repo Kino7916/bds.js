@@ -11,8 +11,11 @@
   - [Installation](#installation)
   - [Usage](#usage)
     - [Creating Environments](#creating-environments)
-    - [Preparing a Script](#preparing-a-script)
+    - [Creating variables and functions](#creating-variables-and-functions)
+    - [Preparing FileScript](#preparing-filescript)
+    - [Multiple Environments](#multiple-environments)
     - [Running Script](#running-script)
+    - [Working with Functions](#working-with-functions)
   - [Goals](#goals)
   - [MIT License](#mit-license)
 
@@ -32,11 +35,16 @@ Example of usage:
 const Environment = require("bds.js").Environments.Environment;
 const env = new Environment();
 ```
-Creating variables and functions:
+### Creating variables and functions
+The use of Environments are to define variables and functions. These "identifiers" can be created by static value or using a function, it doesn't matter if you need extra arguments or not.
+> Inputting arguments to a identifier (example $sum) is to use brackets ([ and ])
+> Example > $sum[2;3;4] is (2 + 3 + 4)
+
+Creating identifiers:
 ```js
-env.set("hello", "world!");
-env.set("age", 24);
-env.set("random", () => Math.random())
+env.set("hello", "world!"); // A string value identifier
+env.set("age", 24); // Number value identifier
+env.set("random", () => Math.random()); // Function without argument (The use of [])
 env.set("random50", (handler) => {
     // Getting raw arguments
     const raw_arguments = handler.getArgs(0, 2);
@@ -48,8 +56,8 @@ env.set("random50", (handler) => {
     return args[0];
 });
 ```
-### Preparing a Script
-Create a file with name `index.bds` and write BDScript code
+### Preparing FileScript
+Create a file with name `index.bds` and fill with BDScript code
 
 Preparing a Script for the file:
 ```js
@@ -57,22 +65,47 @@ const FileScript = require("bds.js").Scripts.FileScript;
 const Script = new FileScript("./index.bds");
 Script.getFileInput();
 ```
+### Multiple Environments
+A way to utilize multiple environments without the need to chain. It is also to support third-party libraries
+
+Initializing Environment Manager:
+```js
+const lib = require("bds.js");
+const { Arithmetics, Utility } = lib.Modules;
+const envManager = lib.Environments.EnvironmentManager;
+// Adding arithmetics and utility modules
+envManager.add("math", new Arithmetics()).add("util", new Utility());
+```
 ### Running Script
 > You can use console.log() to print the output to console
 ```js
-const script = Script.prepareModules();
-script.run();
+const runScript = Script.prepareModules(envManager);
+runScript.run();                              
+```
+### Working with Functions
+> These are modules / environments ready-for-use to help your development:
+- Arithmetics
+- Utility
+
+Functions can return non-string Objects as long as it is not interferred by other type.
+> Functions are case-sensitive, if the function is not found the runtime will error
+
+As example with $pi (from Arithmetics module) and $typeof (Utility):
+```py
+$typeof[$pi] # number
+$typeof[Pi is $pi] #string
 ```
 
 ## Goals
 - [x] Usable
-- [ ] Basic utility Functions
+- [ ] Basic utility Functions (25%)
 - [ ] Conditions support
-- [x] Arithmetic support ( Maybe )
-- [ ] Better Lexer and Parsing
-- [ ] Better Interpreter System
+- [x] Arithmetic support
 - [ ] Compile-able code to JavaScript
 - [ ] Easier access and friendly-code
+- [ ] Native code (JavaScript) support
+- [ ] Import & Export
+- [ ] Runtime Error
 
 ## MIT License
 License can be found [here](https://github.com/Kino7916/bds.js/blob/master/LICENSE)

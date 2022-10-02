@@ -6,59 +6,9 @@ import * as Environments from "./Environment";
 import { isRegExp } from "util/types";
 import { inspect } from "util";
 
-class BuiltInEnvironment extends Environments.ProtectedEnvironment {
+class Utility extends Environments.ProtectedEnvironment {
     public constructor() {
         super();
-        // Basic Functions
-
-        // Arithmatics
-        this.set("sum", (handler) => {
-            let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
-            let v = 0;
-            while (args.length > 0) {
-                v += Number(args.shift());
-                if (isNaN(v)) break;
-            }
-            return v;
-        });
-        this.set("sub", (handler) => {
-            let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
-            let v = 0;
-            while (args.length > 0) {
-                v -= Number(args.shift());
-                if (isNaN(v)) break;
-            }
-            return v;
-        });
-        this.set("multi", (handler) => {
-            let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
-            let v = 0;
-            while (args.length > 0) {
-                v *= Number(args.shift());
-                if (isNaN(v)) break;
-            }
-            return v;
-        });
-        this.set("div", (handler) => {
-            let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
-            let v = 0;
-            while (args.length > 0) {
-                v /= Number(args.shift());
-                if (isNaN(v)) break;
-            }
-            return v;
-        });
-        this.set("isdigit", (handler) => {
-            let arg = handler.waitForArguments(handler.getArg(0));
-            return !isNaN(arg[0]);
-        });
-        this.set("isNaN", (handler) => {
-            let arg = handler.waitForArguments(handler.getArg(0));
-            return isNaN(arg[0]);
-        });
-
-        // Utility functions
-        this.set("random", () => Math.random());
         this.set("print", (handler) => {
             console.log(...handler.waitForArguments(...handler.getArgs(0,handler.getArgLength())));
             return "";
@@ -88,19 +38,107 @@ class BuiltInEnvironment extends Environments.ProtectedEnvironment {
                 return text;
             }
         });
-
-        this.cache.lock();
+        this.set("typeof", (handler) => {
+            let arg = handler.waitForArguments(handler.getArg(0));
+            return typeof arg.shift();
+        });
     }
 }
 
 class Arithmetics extends Environments.ProtectedEnvironment {
     public constructor() {
-        this.parent();
+        super()
+        this.set("sum", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
+            let v = 0;
+            while (args.length > 0) {
+                v += Number(args.shift());
+                if (isNaN(v)) break;
+            }
+            return v;
+        });
+        this.set("sub", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
+            let v = 0;
+            while (args.length > 0) {
+                v -= Number(args.shift());
+                if (isNaN(v)) break;
+            }
+            return v;
+        });
+        this.set("multi", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
+            let v = 1;
+            while (args.length > 0) {
+                v *= Number(args.shift());
+                if (isNaN(v)) break;
+            }
+            return v;
+        });
+        this.set("div", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
+            let v = Number(args.shift());
+            while (args.length > 0) {
+                v /= Number(args.shift());
+                if (isNaN(v)) break;
+            }
+            return v;
+        });
+        this.set("modulo", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, 2));
+            return args.shift() % args.shift();
+        });
+
+        // Utilities
+        this.set("isdigit", (handler) => {
+            let arg = handler.waitForArguments(handler.getArg(0));
+            return !isNaN(arg[0]);
+        });
+        this.set("isNaN", (handler) => {
+            let arg = handler.waitForArguments(handler.getArg(0));
+            return isNaN(arg[0]);
+        });
+        this.set("random", () => Math.random());
+        this.set("pi", () => Math.PI);
+        this.set("round", (handler) => {
+            let args = handler.waitForArguments(handler.getArg(0));
+            return Math.round(args.shift());
+        });
+        this.set("floor", (handler) => {
+            let args = handler.waitForArguments(handler.getArg(0));
+            return Math.floor(args.shift());
+        });
+        this.set("ceil", (handler) => {
+            let args = handler.waitForArguments(handler.getArg(0));
+            return Math.ceil(args.shift());
+        });
+        this.set("trunc", (handler) => {
+            let args = handler.waitForArguments(handler.getArg(0));
+            return Math.trunc(args.shift());
+        });
+        this.set("min", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
+            return Math.min(...args);
+        });
+        this.set("max", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
+            return Math.max(...args);
+        });
+        this.set("pow", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, 2));
+            return Math.pow(args.shift(), args.shift());
+        });
+        this.set("abs", (handler) => {
+            let args = handler.waitForArguments(handler.getArg(0));
+            return Math.abs(args.shift());
+        });
+        this.cache.lock();
     }
 }
 
 const Modules = {
-    BuiltInEnvironment
+    Utility,
+    Arithmetics
 }
 
 export {
