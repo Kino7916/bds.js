@@ -93,7 +93,6 @@ class EnvironmentManager extends Environment {
         let kenv = "";
         let fn = "";
         let err;
-        console.log(this.envs)
         for (const [k, env] of Array.from(this.envs.entries())) {
             try {
                 fn = env.get(key);
