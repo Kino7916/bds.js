@@ -84,8 +84,11 @@ runScript.run();
 ```
 ### Working with Functions
 > These are modules / environments ready-for-use to help your development:
-- Arithmetics
-- Utility
+- `Arithmetics`
+- `Utility`
+- `Process`
+- `ObjectInteract`
+- `OS`
 
 Functions can return non-string Objects as long as it is not interferred by other type.
 > Functions are case-sensitive, if the function is not found the runtime will error
@@ -99,13 +102,15 @@ $typeof[Pi is $pi] #string
 ## Goals
 - [x] Usable
 - [ ] Basic utility Functions (25%)
-- [ ] Conditions support
+- [ ] Conditions / Logic support
 - [x] Arithmetic support
 - [ ] Compile-able code to JavaScript
 - [ ] Easier access and friendly-code
 - [ ] Native code (JavaScript) support
 - [ ] Import & Export
 - [ ] Runtime Error
+- [ ] Discord Client
+- [ ] Async promise support
 
 ## MIT License
 License can be found [here](https://github.com/Kino7916/bds.js/blob/master/LICENSE)

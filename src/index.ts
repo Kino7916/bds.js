@@ -5,14 +5,12 @@ import * as Scripts from "./Script";
 import * as Environments from "./Environment";
 import { isRegExp } from "util/types";
 import { inspect } from "util";
+import * as os from "os";
 
 class Utility extends Environments.ProtectedEnvironment {
     public constructor() {
         super();
-        this.set("print", (handler) => {
-            console.log(...handler.waitForArguments(...handler.getArgs(0,handler.getArgLength())));
-            return "";
-        });
+        
         this.set("regexp", (handler) => {
             const [pattern, flag] = handler.waitForArguments(...handler.getArgs(0,2));
             if (!pattern) throw new Error('pattern is required!');
@@ -42,9 +40,108 @@ class Utility extends Environments.ProtectedEnvironment {
             let arg = handler.waitForArguments(handler.getArg(0));
             return typeof arg.shift();
         });
+        this.set("instanceof", (handler) => {
+            let arg = handler.waitForArguments(...handler.getArgs(0, 2));
+            return arg.shift() instanceof arg.shift();
+        });
+        this.set("substr", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, 3));
+            if (typeof args[0] !== "string") throw new Error("arg0 must be typeof string!");
+            return args.shift().substring(...args);
+        });
+        this.set("contains", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, 2));
+            if (typeof args[0] !== "string") throw new Error("arg0 must be typeof string!");
+            return (args.shift() as string).includes(args.shift());
+        });
+        this.set("indexOf", (handler) => {
+            let args = handler.waitForArguments(...handler.getArgs(0, 2));
+            if (typeof args[0] !== "string") throw new Error("arg0 must be typeof string!");
+            return (args.shift() as string).indexOf(args.shift());
+        });
+        this.set("len", (handler) => {
+            return String(handler.waitForArguments(handler.getArg(0)) ?? "").length;
+        });
+        this.set("uppercase", (handler) => {
+            return String(handler.waitForArguments(handler.getArg(0)) ?? "").toUpperCase();
+        });
+        this.set("lowercase", (handler) => {
+            return String(handler.waitForArguments(handler.getArg(0)) ?? "").toLowerCase();
+        });
+        this.set("localuppercase", (handler) => {
+            return String(handler.waitForArguments(handler.getArg(0)) ?? "").toLocaleUpperCase();
+        });
+        this.set("locallowercase", (handler) => {
+            return String(handler.waitForArguments(handler.getArg(0)) ?? "").toLocaleLowerCase();
+        });
+
+        this.cache.lock();
     }
 }
 
+class Process extends Environments.ProtectedEnvironment {
+    public constructor() {
+        super();
+        
+        this.set("print", (handler) => {
+            console.log(...handler.waitForArguments(...handler.getArgs(0,handler.getArgLength())));
+            return "";
+        });
+        this.set("warn", (handler) => {
+            console.warn(...handler.waitForArguments(...handler.getArgs(0,handler.getArgLength())));
+            return "";
+        });
+        this.set("error", (handler) => {
+            console.error(...handler.waitForArguments(...handler.getArgs(0,handler.getArgLength())));
+            return "";
+        });
+        this.set("memoryUsage", () => process.memoryUsage());
+        this.cache.lock();
+    }
+}
+
+class ObjectInteract extends Environments.ProtectedEnvironment {
+    public constructor() {
+        super();
+
+        this.set("new", (handler) => {
+            if (handler.getArgLength() > 0) {
+                let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
+                if (args[0]?.constructor) return new (args.shift() as any)()
+            } else return {};
+        });
+        
+        this.set("get", (handler) => {
+            if (handler.getArgLength() < 2) throw new Error("Expected 2 argument, got 0");
+            let args = handler.waitForArguments(...handler.getArgs(0, 2));
+            return args.shift()[args.shift()];
+        });
+
+        this.set("set", (handler) => {
+            if (handler.getArgLength() < 3) throw new Error("Expected 3 argument, got 0");
+            let args = handler.waitForArguments(...handler.getArgs(0, 3));
+            return args.shift()[args.shift()] = args.shift();
+        });
+
+        this.set("delete", (handler) => {
+            if (handler.getArgLength() < 2) throw new Error("Expected 2 argument, got 0");
+            let args = handler.waitForArguments(...handler.getArgs(0, 2));
+            delete args.shift()[args.shift()];
+            return "";
+        });
+        this.cache.lock();
+    }
+}
+
+class OS extends Environments.ProtectedEnvironment {
+    public constructor() {
+        super();
+
+
+        this.cache.lock();
+    }
+}
+ 
 class Arithmetics extends Environments.ProtectedEnvironment {
     public constructor() {
         super()
@@ -138,7 +235,10 @@ class Arithmetics extends Environments.ProtectedEnvironment {
 
 const Modules = {
     Utility,
-    Arithmetics
+    Arithmetics,
+    Process,
+    ObjectInteract,
+    OS
 }
 
 export {
