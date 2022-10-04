@@ -61,6 +61,14 @@ class Script {
             return this.env.get(args.shift());
         });
 
+        this.env.set("tryAndCatch", (handler) => {
+            try {
+                return handler.waitForArguments(handler.getArg(0)).shift();
+            } catch (err) {
+                return err;
+            }
+        });
+
         return this;
     }
 

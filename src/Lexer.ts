@@ -6,7 +6,8 @@ enum TOKEN_TYPE {
     LPAREN,
     RPAREN,
     SEMI,
-    IDENTIFIER
+    IDENTIFIER,
+    OP
 }
 
 class Token {
@@ -71,14 +72,16 @@ class Lexer {
             case "[": this.next(); return new Token(TOKEN_TYPE.LPAREN, char);
             case "]": this.next(); return new Token(TOKEN_TYPE.RPAREN, char);
             case ";": this.next(); return new Token(TOKEN_TYPE.SEMI, char);
-            case "$": return this.make_id();
+            case "$": return this._makeId();
             case "\\": this.next(); this.escape_c = true; return null;
         }
+
+        if (OPS.indexOf(char) > -1) return this._makeOps();
 
         if (this.eof()) {
             if (x) return new Token(TOKEN_TYPE.STRING, x);
         } else {
-            let str = x + this.make_str();
+            let str = x + this._makeStr();
             let arr: (string | number)[] = str.match(/\w+|\W+|\d+/g)
             let arrt: Token[] = [];
             while (arr.length > 0) {
@@ -108,16 +111,20 @@ class Lexer {
         }
         return x;
     }
-    public make_id() {
+    public _makeId() {
         const expr = (c: string) => (LETTERS.test(c));
         this.next();
         const id = this.splitter(expr);
         return new Token(TOKEN_TYPE.IDENTIFIER, id);
     }
-    public make_str() {
+    public _makeStr() {
         const expr = (c: string) => (SYNTAX.indexOf(c) > -1);
         const str = this.splitter(expr);
         return str;
+    }
+    public _makeOps() {
+        const expr = (c:string) => (OPS.indexOf(c) > -1);
+        return new Token(TOKEN_TYPE.OP, this.splitter(expr));
     }
 }
 

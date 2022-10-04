@@ -1,5 +1,5 @@
 import { Token, TOKEN_TYPE } from "./Lexer";
-import { NodeArgument, NodeIdentifier, NodeNumber, NodeProgram, NodeString, NodeToken } from "./Nodes";
+import { NodeArgument, NodeIdentifier, NodeNumber, NodeOp, NodeProgram, NodeString, NodeToken } from "./Nodes";
 
 class Parser {
     tokens: Token[] = [];
@@ -18,6 +18,7 @@ class Parser {
         switch (token.type as number) {
             case TOKEN_TYPE.STRING: return new NodeString(token.value);
             case TOKEN_TYPE.NUMBER: return new NodeNumber(token.value);
+            case TOKEN_TYPE.OP: return new NodeOp(token.value);
             case TOKEN_TYPE.IDENTIFIER: return this._parseIdentifier(token);
         }
 

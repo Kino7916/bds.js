@@ -74,6 +74,11 @@ class Utility extends Environments.ProtectedEnvironment {
         this.set("locallowercase", (handler) => {
             return String(handler.waitForArguments(handler.getArg(0)) ?? "").toLocaleLowerCase();
         });
+        this.set("throw", (handler) => {
+            throw handler.waitForArguments(handler.getArg(0)).shift();
+        });
+
+        this.set("Error", () => Error);
 
         this.cache.lock();
     }
@@ -96,6 +101,14 @@ class Process extends Environments.ProtectedEnvironment {
             return "";
         });
         this.set("memoryUsage", () => process.memoryUsage());
+        this.set("pid", process.pid);
+        this.set("platform", process.platform);
+        this.set("title", process.title);
+        this.set("hrtime", process.hrtime);
+        this.set("uptime", () => process.uptime());
+        this.set("version", process.version);
+        this.set("cwd", process.cwd());
+
         this.cache.lock();
     }
 }
@@ -107,7 +120,7 @@ class ObjectInteract extends Environments.ProtectedEnvironment {
         this.set("new", (handler) => {
             if (handler.getArgLength() > 0) {
                 let args = handler.waitForArguments(...handler.getArgs(0, handler.getArgLength()));
-                if (args[0]?.constructor) return new (args.shift() as any)()
+                if (args[0]?.constructor) return new (args.shift() as any)(...args)
             } else return {};
         });
         
@@ -137,7 +150,13 @@ class OS extends Environments.ProtectedEnvironment {
     public constructor() {
         super();
 
-
+        this.set("tmpdir", () => os.tmpdir());
+        this.set("type", () => os.type())
+        this.set("platform", () => os.platform());
+        this.set("arch", () => os.arch());
+        this.set("freemem", () => os.freemem());
+        this.set("totalmem", () => os.totalmem());
+        this.set("cpus", () => os.cpus());
         this.cache.lock();
     }
 }

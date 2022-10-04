@@ -1,12 +1,17 @@
 # bds.js
-> Run and simulate string-based BDScript language in JavaScript
+Run and simulate string-based BDScript language in JavaScript
 
 ## Prerequisites
 > This project requires a JavaScript runtime which supports ES2020 and ESModules.
 
+## Changelog v1.0.9
+- Added `OS`, `Process`, `ObjectInteract` class
+- New features `$throw`, `$new`, `$tryAndCatch`, `$let`, `$get`
+
 ## Table of Contents
 - [bds.js](#bdsjs)
   - [Prerequisites](#prerequisites)
+  - [Changelog v1.0.9](#changelog-v109)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Usage](#usage)
@@ -101,7 +106,7 @@ $typeof[Pi is $pi] #string
 
 ## Goals
 - [x] Usable
-- [ ] Basic utility Functions (25%)
+- [ ] Basic utility Functions (45%)
 - [ ] Conditions / Logic support
 - [x] Arithmetic support
 - [ ] Compile-able code to JavaScript

@@ -1,4 +1,5 @@
 import { Context } from "./Context";
+import { Token } from "./Lexer";
 
 class NodePosition {
     public constructor(public idx: number, public p: number, public ln: number) {}
@@ -14,10 +15,10 @@ abstract class NodeToken {
     public visit(ctx: Context) {throw new Error("Unimplemented Err!")}
 }
 
-abstract class NodeWChildren extends NodeToken {
-    public children = new Map<number, NodeToken>();
+abstract class NodeWChildren<T extends NodeToken | Token = NodeToken> extends NodeToken {
+    public children = new Map<number, T>();
     public constructor() {super()}
-    public _addChild(node: NodeToken) {
+    public _addChild(node: T) {
         this.children.set(this.children.size, node);
     }
 }
@@ -71,6 +72,13 @@ class NodeIdentifier extends NodeWChildren {
     }
 }
 
+class NodeOp extends NodeToken {
+    public constructor(public value: string) {super()}
+    public visit(ctx: Context) {
+        return this.value;
+    }
+}
+
 class NodeProgram extends NodeWChildren {
     public constructor(public fileName: string) {super()};
     public visit(ctx: Context) {
@@ -112,5 +120,6 @@ export {
     NodeIdentifier,
     NodeArgument,
     NodeProgram,
-    NodeWChildren
+    NodeWChildren,
+    NodeOp
 }

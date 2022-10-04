@@ -1,7 +1,7 @@
 import { FnHandler } from "./FnHandler";
 
 type FnFunction = (handler: FnHandler) => any;
-type ValueLike = string | number | FnFunction;
+type ValueLike = object | string | number | FnFunction;
 
 class Environment {
     protected cache = new Map<string, any>();
