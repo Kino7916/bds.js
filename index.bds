@@ -1,1 +1,1 @@
-This is a test $throw[$new[$Error; This is a message]]
+This is a test $eval[$readFileSync[file.bds;$set[$new;encoding;utf8]]]

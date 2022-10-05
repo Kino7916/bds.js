@@ -4,14 +4,20 @@ Run and simulate string-based BDScript language in JavaScript
 ## Prerequisites
 > This project requires a JavaScript runtime which supports ES2020 and ESModules.
 
-## Changelog v1.0.9
-- Added `OS`, `Process`, `ObjectInteract` class
-- New features `$throw`, `$new`, `$tryAndCatch`, `$let`, `$get`
+## Changelog v1.0.10
+### Added / New
+- Added `Path`, `FileSystem` class
+- New features `$eval`
+- getter method `argLength`, a replacement for `getArgLength`
+### Deprecated
+- Function `getArgLength` deprecated, use `argLength` instead
 
 ## Table of Contents
 - [bds.js](#bdsjs)
   - [Prerequisites](#prerequisites)
-  - [Changelog v1.0.9](#changelog-v109)
+  - [Changelog v1.0.10](#changelog-v1010)
+    - [Added / New](#added--new)
+    - [Deprecated](#deprecated)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Usage](#usage)
@@ -94,6 +100,8 @@ runScript.run();
 - `Process`
 - `ObjectInteract`
 - `OS`
+- `Path`
+- `FileSystem`
 
 Functions can return non-string Objects as long as it is not interferred by other type.
 > Functions are case-sensitive, if the function is not found the runtime will error

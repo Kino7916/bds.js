@@ -8,5 +8,7 @@ env_mgr.addEnv("native-util", new lib.Modules.Utility);
 env_mgr.addEnv("native-os", new lib.Modules.OS);
 env_mgr.addEnv("native-process", new lib.Modules.Process);
 env_mgr.addEnv("native-OI", new lib.Modules.ObjectInteract);
+env_mgr.addEnv("native-path", new lib.Modules.Path);
+env_mgr.addEnv("native-fs", new lib.Modules.FileSystem);
 const sc = script.prepareModules(env_mgr);
 console.log(sc.run())

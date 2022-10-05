@@ -6,7 +6,15 @@ class FnHandler {
     public constructor(private node: NodeIdentifier, private ctx: Context) {
         if (this.node.children.size > 0) this.hasArgs = true;
     }
+    public get argLength() {
+        return this.node.children.size;
+    }
+    /**
+     * @deprecated Legacy function, use `argLength` instead
+     * @returns 
+     */
     public getArgLength() {
+        console.warn(`Legacy function used 'getArgLength', use 'argLength' instead`);
         return this.node.children.size;
     }
     public getEnv() {
