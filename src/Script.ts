@@ -48,22 +48,27 @@ class Script {
             this.env.set("__dirname", path.join(this.fileName, ".."));
         }
 
-        this.env.set("let", (handler) => {
-            if (handler.getArgLength() < 2) throw new Error("Expected 2 argument, got 0");
-            let args = handler.waitForArguments(...handler.getArgs(0, 2));
+        this.env.set("async", async (handler) => {
+            handler.getEnv().set("__async", true);
+            return true;
+        });
+
+        this.env.set("let", async (handler) => {
+            if (handler.argLength < 2) throw new Error("Expected 2 argument, got 0");
+            let args = await handler.waitForArguments(...handler.getArgs(0, 2));
             this.env.set(args.shift(), args.shift());
             return "";
         });
 
-        this.env.set("get", (handler) => {
-            if (handler.getArgLength() < 1) throw new Error("Expected 1 argument, got 0");
-            let args = handler.waitForArguments(handler.getArg(0));
+        this.env.set("get", async (handler) => {
+            if (handler.argLength < 1) throw new Error("Expected 1 argument, got 0");
+            let args = await handler.waitForArguments(handler.getArg(0));
             return this.env.get(args.shift());
         });
 
-        this.env.set("tryAndCatch", (handler) => {
+        this.env.set("tryAndCatch", async (handler) => {
             try {
-                return handler.waitForArguments(handler.getArg(0)).shift();
+                return (await handler.waitForArguments(handler.getArg(0))).shift();
             } catch (err) {
                 return err;
             }

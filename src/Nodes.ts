@@ -1,3 +1,4 @@
+import { isPromise } from "util/types";
 import { Context } from "./Context";
 import { Token } from "./Lexer";
 
@@ -12,6 +13,11 @@ class NodePosition {
 }
 abstract class NodeToken {
     public constructor() {}
+    /**
+     * 
+     * @param ctx 
+     * @returns {any}
+     */
     public visit(ctx: Context) {throw new Error("Unimplemented Err!")}
 }
 
@@ -35,33 +41,16 @@ class NodeNumber extends NodeToken {
 
 class NodeArgument extends NodeWChildren {
     public constructor() {super()}
-    public visit(ctx: Context) {
+    public async visit(ctx: Context) {
         let values = [];
         const arr = Array.from(this.children.values());
         while (arr.length > 0) {
             const node = arr.shift();
-            values.push(node.visit(ctx));
+            const res = node.visit(ctx);
+            if (isPromise(res)) values.push(await res)
+            else values.push(res);
         }
-        return this._valueReturn(values)
-    }
-    public _valueReturn(values: any[]) {
-        if (values.length > 1) {
-            return values.reduce((pv, v) => {
-                if (!pv) return v;
-                if (!isNaN(v) && !/\s/.test(v)) {
-                    if (isNaN(pv)) {
-                        pv = `${pv}${v}`;
-                    } else {
-                        pv = Number(`${pv}${v}`)
-                    }
-                } else {
-                    pv = `${pv}${v}`;
-                }
-                return pv;
-            }, null)
-        } else if (values.length > 0) {
-            return values[0];
-        } else null;
+        return ctx.mapValues(values);
     }
 }
 
@@ -79,37 +68,8 @@ class NodeOp extends NodeToken {
     }
 }
 
-class NodeProgram extends NodeWChildren {
+class NodeProgram extends NodeArgument {
     public constructor(public fileName: string) {super()};
-    public visit(ctx: Context) {
-        const arr = Array.from(this.children.values());
-        let values = [];
-        while (arr.length > 0) {
-            const node = arr.shift();
-            values.push(node.visit(ctx))
-        }
-        return this._valueReturn(values);
-    };
-
-    public _valueReturn(values: any[]) {
-        if (values.length > 1) {
-            return values.reduce((pv, v) => {
-                if (!pv) return v;
-                if (!isNaN(v) && !/\s/.test(v)) {
-                    if (isNaN(pv)) {
-                        pv = `${pv}${v}`;
-                    } else {
-                        pv = Number(`${pv}${v}`)
-                    }
-                } else {
-                    pv = `${pv}${v}`;
-                }
-                return pv;
-            }, null)
-        } else if (values.length > 0) {
-            return values[0];
-        } else null;
-    }
 }
 
 export {

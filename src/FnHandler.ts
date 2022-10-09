@@ -1,8 +1,10 @@
+import { isPromise } from "util/types";
 import { Context } from "./Context";
-import { NodeArgument, NodeIdentifier, NodeToken } from "./Nodes";
+import { NodeIdentifier, NodeToken } from "./Nodes";
 
 class FnHandler {
     public hasArgs = false;
+    private _incoming = [];
     public constructor(private node: NodeIdentifier, private ctx: Context) {
         if (this.node.children.size > 0) this.hasArgs = true;
     }
@@ -30,8 +32,26 @@ class FnHandler {
             const node = args[i++];
             values.push(node.visit(this.ctx));
         }
-        return values;
+        return Promise.all(values);
     };
+    private *_syncIterator(nodes: NodeToken[]) {
+        let res = yield nodes.shift().visit(this.ctx); 
+        
+        this._incoming.push(res);
+    }
+    private _handleSync(nodes: NodeToken[], fn = this._syncIterator) {
+        let iterator = fn.apply(this, [nodes]);
+        let loop = (result: any) => {
+            if (result.done) return;
+            if (!isPromise(result)) loop(iterator.next(result))
+            else result.then(
+                (res: any) => loop(iterator.next(res)),
+                (err: Error) => loop(iterator.throw(err))
+            );
+        }
+
+        loop(iterator.next());
+    }
     public getIdentifier(key: string) {
         return this.ctx.script.env.get(key);
     }

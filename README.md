@@ -4,20 +4,20 @@ Run and simulate string-based BDScript language in JavaScript
 ## Prerequisites
 > This project requires a JavaScript runtime which supports ES2020 and ESModules.
 
-## Changelog v1.0.10
+## Changelog v1.0.11
 ### Added / New
-- Added `Path`, `FileSystem` class
-- New features `$eval`
-- getter method `argLength`, a replacement for `getArgLength`
-### Deprecated
-- Function `getArgLength` deprecated, use `argLength` instead
+- Support Promises (I/O Blocking)
+### Breaking
+- Execution system is changed to asynchronous
+- `waitForArguments` return asynchronous
+- `callIdentifier` return asynchronous
 
 ## Table of Contents
 - [bds.js](#bdsjs)
   - [Prerequisites](#prerequisites)
-  - [Changelog v1.0.10](#changelog-v1010)
+  - [Changelog v1.0.11](#changelog-v1011)
     - [Added / New](#added--new)
-    - [Deprecated](#deprecated)
+    - [Breaking](#breaking)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Usage](#usage)
@@ -56,13 +56,13 @@ Creating identifiers:
 env.set("hello", "world!"); // A string value identifier
 env.set("age", 24); // Number value identifier
 env.set("random", () => Math.random()); // Function without argument (The use of [])
-env.set("random50", (handler) => {
+env.set("random50", async (handler) => {
     // Getting raw arguments
     const raw_arguments = handler.getArgs(0, 2);
     // Waiting for arguments to run
-    const arguments = handler.waitForArguments(...raw_arguments);
+    const arguments = await handler.waitForArguments(...raw_arguments);
     // Calling functions
-    const chance = handler.callIdentifier("random") * 100;
+    const chance = await handler.callIdentifier("random") * 100;
     if (chance > 50) return args[1];
     return args[0];
 });
@@ -114,7 +114,7 @@ $typeof[Pi is $pi] #string
 
 ## Goals
 - [x] Usable
-- [ ] Basic utility Functions (45%)
+- [ ] Basic utility Functions (50%)
 - [ ] Conditions / Logic support
 - [x] Arithmetic support
 - [ ] Compile-able code to JavaScript
@@ -123,7 +123,7 @@ $typeof[Pi is $pi] #string
 - [ ] Import & Export
 - [ ] Runtime Error
 - [ ] Discord Client
-- [ ] Async promise support
+- [x] Async promise support
 
 ## MIT License
 License can be found [here](https://github.com/Kino7916/bds.js/blob/master/LICENSE)
