@@ -1,6 +1,6 @@
 {
   "name": "bds.js",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "A simple interpreter written to simulate and run BDScript Language in JavaScript",
   "main": "lib/index.js",
   "scripts": {
