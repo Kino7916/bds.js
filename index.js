@@ -1,23 +1,16 @@
-const lib = require("./lib");
-const path = require("path");
-const script = new lib.Scripts.FileScript("./index.bds");
-script.getFileInput();
-const env_mgr = new lib.Environments.EnvironmentManager();
-env_mgr.addEnv("native-math", new lib.Modules.Arithmetics);
-env_mgr.addEnv("native-util", new lib.Modules.Utility);
-env_mgr.addEnv("native-os", new lib.Modules.OS);
-env_mgr.addEnv("native-process", new lib.Modules.Process);
-env_mgr.addEnv("native-OI", new lib.Modules.ObjectInteract);
-env_mgr.addEnv("native-path", new lib.Modules.Path);
-env_mgr.addEnv("native-fs", new lib.Modules.FileSystem);
-env_mgr.set("test", async (handler) => {
-    return await handler.waitForArguments(...handler.getArgs(0, handler.argLength));
+const lib = require("./lib/index");
+// const lexer = new lib.Lexer("Af$input[Ab;$puli;$tp[f;$pi;15f];12]");
+// const parser = new lib.Parser();
+// const env = new (require("./lib/Environment").Environment)();
+// const ctx = new (require("./lib/Context").Context)("<module>", env);
+// const evaluator = new lib.Evaluator(ctx);
+// const ast = parser.parseToAst(lexer.main());
+// const result = evaluator.evaluate(ast);
+const runtime = new lib.Runtime();
+runtime.global.set('$print', (ctx) => {
+    console.log(ctx.evaluateArgs(ctx.getArgs())[0]);
+    return "";
 });
-env_mgr.set("v1", (handler) => {
-    return "v1awd"
-});
-env_mgr.set("v2", async () => {
-    return Promise.resolve(14)
-});
-const sc = script.prepareModules(env_mgr);
-sc.run().then(console.log)
+const input = "14fast$print[ab]"
+const result = runtime.runInput(__filename, input);
+console.log(result);

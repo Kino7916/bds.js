@@ -1,74 +1,82 @@
-import { Token, TOKEN_TYPE } from "./Lexer";
-import { NodeArgument, NodeIdentifier, NodeNumber, NodeOp, NodeProgram, NodeString, NodeToken } from "./Nodes";
+import { Token, TokenProgram } from "./Lexer";
+import { Runtime } from "./Runtime";
 
 class Parser {
-    tokens: Token[] = [];
-    public constructor(private _tokens: Token[]) {}
-
-    public main() {
-        this.tokens = this._tokens.concat();
-        let node = new NodeProgram("<module>");
+    tokens: Token[];
+    private busy: boolean;
+    public constructor() {}
+    
+    public get isBusy() {return this.busy};
+    parseToAst(tokens: Token[], runtime: Runtime): TokenProgram {
+        if (this.busy) throw new Error("Parser is busy!");
+        this.tokens = tokens;
+        this.busy = true;
+        let arr = [];
+        
         while (this.tokens.length > 0) {
-            node._addChild(this._parseAtom());
+            arr.push(this.parseAtom(runtime));
         }
-        return node;
+        return {type: "program", child: arr}
     }
-    public _parseAtom() {
-        let token = this.tokens.shift();
-        switch (token.type as number) {
-            case TOKEN_TYPE.STRING: return new NodeString(token.value);
-            case TOKEN_TYPE.NUMBER: return new NodeNumber(token.value);
-            case TOKEN_TYPE.OP: return new NodeOp(token.value);
-            case TOKEN_TYPE.IDENTIFIER: return this._parseIdentifier(token);
-        }
-
-        // Unknown Token
-        throw new Error("Unexpected syntax of '" + token.value + "'")
+    peek(offset = 0) {
+        return this.tokens[offset]
     }
-    public _parseIdentifier(token: Token) {
-        if (!token.value) throw new Error(`${TOKEN_TYPE[token.type]}_TOKEN found, but it does not have a name!`);
-        const node = new NodeIdentifier(token.value);
-
-        // Parse argument if next is LPAREN
-        if (this.tokens[0]?.type === TOKEN_TYPE.LPAREN) {
-            this.tokens.shift();
-            let childs = this._parseParen();
-            while (childs.length > 0) {
-                node._addChild(this._makeArgument(childs));
-            }
-        }
-        return node;
+    shift() {
+        return this.tokens.shift();
     }
-    public _parseParen() {
-        let tokens: (NodeToken | Token)[] = [];
+    eof() {
+        return !(this.tokens.length > 0);
+    }
+    last(arr: any[]) {
+        return arr[arr.length -1]
+    }
+    readArgument(runtime: Runtime) {
+        let arr = [];
         let end = false;
-        while (this.tokens.length > 0) {
-            if (this.tokens[0].type === TOKEN_TYPE.RPAREN) {
+        let arg = {type: "argument", child: []}
+        this.shift();
+        while (!this.eof()) {
+            if (this.peek()?.type === "close") {
                 end = true;
-                this.tokens.shift()
+                this.shift();
                 break;
             }
-
-            if (this.tokens[0].type === TOKEN_TYPE.SEMI)
-                tokens.push(this.tokens.shift())
-            else
-                tokens.push(this._parseAtom());
+            if (this.peek()?.type === "newArg") {
+                arr.push(arg);
+                arg = {type: "argument", child: []};
+                this.shift();
+                continue;
+            }
+            arg.child.push(this.parseAtom(runtime));
         }
-        if (!end) throw new Error(`Expected to find ${TOKEN_TYPE[3]}_TOKEN, instead not found!`);
-        return tokens;
-    }
-
-    public _makeArgument(tokens: (NodeToken | Token)[]) {
-        const argument = new NodeArgument();
-        while (tokens.length > 0) {
-            const node = tokens.shift();
-            if (node instanceof Token) break;
-            argument._addChild(node);
+        if (arg) {
+            arr.push(arg);
+            arg = void 0;
         }
-        return argument;
+        if (end === false) throw new Error(`Expected ']', got none`)
+        return arr;
     }
+    parseParen(runtime: Runtime): Token[] {
+        return this.readArgument(runtime);
+    };
+    parseAtom(runtime: Runtime) {
+        let token = this.shift();
+        if (token.type === "string") return token;
+        if (token.type === "number") return token;
+        if (token.type === "operator") return token;
+        if (token.type === "call") {
+            if (this.peek().type === "open") token.child = this.parseParen(runtime);
+            return token;
+        }
+        if (runtime.options.alwaysStrict === false) 
+        switch(token.type) {
+            case "open": return {value: "[", type: "string"};
+            case "close": return {value: "]", type: "string"};
+            case "newArg": return {value: ";", type: "string"};
+        }
+
+        throw new Error(`Unexpected token of ${token.type} at ${token.pos}:${token.line}`)
+    };
 }
 
-export {
-    Parser
-}
+export { Parser };
