@@ -1,6 +1,6 @@
 import { Environment } from "./Environment"
 import { RuntimeBag } from "./RuntimeBag";
-import { Token, TokenArgument, TokenCall } from "./Lexer";
+import { TokenArgument, TokenCall } from "./Lexer";
 import { Runtime } from "./Runtime";
 import { Evaluator } from "./Evaluator";
 type FnFunction = (ctx: Context) => any;
@@ -8,7 +8,7 @@ type FnFunction = (ctx: Context) => any;
 class Context {
     private _target: TokenCall = null;
     public constructor(public fileName: string, public bag: RuntimeBag, public env: Environment, public runtime: Runtime) {}
-    callIdentifier(node: TokenCall) {
+    async callIdentifier(node: TokenCall) {
         const fn = this.env.get(node.value);
         let lastTarget = this._target;
         if (typeof fn === "function") {

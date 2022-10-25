@@ -12,8 +12,7 @@ class Parser {
         this.tokens = tokens;
         this.busy = true;
         let arr = [];
-        
-        while (this.tokens.length > 0) {
+        while (!this.eof()) {
             arr.push(this.parseAtom(runtime));
         }
         return {type: "program", child: arr}
@@ -65,7 +64,7 @@ class Parser {
         if (token.type === "number") return token;
         if (token.type === "operator") return token;
         if (token.type === "call") {
-            if (this.peek().type === "open") token.child = this.parseParen(runtime);
+            if (this.peek()?.type === "open") token.child = this.parseParen(runtime);
             return token;
         }
         if (runtime.options.alwaysStrict === false) 

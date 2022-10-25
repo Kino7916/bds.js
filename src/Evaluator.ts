@@ -18,20 +18,20 @@ class EvaluatorImpl {
     visitCall(node: TokenCall, ctx: Context) {
         return ctx.callIdentifier(node);
     };
-    visitArgument(arg: TokenProgram | TokenArgument, ctx: Context) {
+    async visitArgument(arg: TokenProgram | TokenArgument, ctx: Context) {
         let arr = arg.child.copyWithin(-1, -1);
         let v = []
         while (arr.length > 0) {
             let node = arr.shift();
-            let res = this.visit(node, ctx);
+            let res = await this.visit(node, ctx);
             v.push(res);
         }
         return this.mapValues(v);
     };
 
-    mapValues(values: any[]) {
+    async mapValues(values: any[]) {
         if (values.length < 1) return values[0];
-        return values.map(v => String(v)).join("");
+        return (await Promise.all(values.map(async v => String(await v)))).join('');
     }
 }
 const Evaluator = new EvaluatorImpl()
