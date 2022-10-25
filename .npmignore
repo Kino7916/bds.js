@@ -2,3 +2,5 @@ node_modules
 src
 index.js
 index.bds
+src_old
+lib_old

@@ -1,4 +1,5 @@
 import { Token, TokenProgram } from "./Lexer";
+import { Runtime } from "./Runtime";
 
 class Parser {
     tokens: Token[];
@@ -6,14 +7,14 @@ class Parser {
     public constructor() {}
     
     public get isBusy() {return this.busy};
-    parseToAst(tokens: Token[]): TokenProgram {
+    parseToAst(tokens: Token[], runtime: Runtime): TokenProgram {
         if (this.busy) throw new Error("Parser is busy!");
         this.tokens = tokens;
         this.busy = true;
         let arr = [];
         
         while (this.tokens.length > 0) {
-            arr.push(this.parseAtom());
+            arr.push(this.parseAtom(runtime));
         }
         return {type: "program", child: arr}
     }
@@ -29,7 +30,7 @@ class Parser {
     last(arr: any[]) {
         return arr[arr.length -1]
     }
-    readArgument() {
+    readArgument(runtime: Runtime) {
         let arr = [];
         let end = false;
         let arg = {type: "argument", child: []}
@@ -38,7 +39,6 @@ class Parser {
             if (this.peek()?.type === "close") {
                 end = true;
                 this.shift();
-                console.log("found end")
                 break;
             }
             if (this.peek()?.type === "newArg") {
@@ -47,24 +47,34 @@ class Parser {
                 this.shift();
                 continue;
             }
-            arg.child.push(this.parseAtom());
+            arg.child.push(this.parseAtom(runtime));
         }
-
-        if (end === false) throw new Error(``)
+        if (arg) {
+            arr.push(arg);
+            arg = void 0;
+        }
+        if (end === false) throw new Error(`Expected ']', got none`)
         return arr;
     }
-    parseParen(): Token[] {
-        return this.readArgument();
+    parseParen(runtime: Runtime): Token[] {
+        return this.readArgument(runtime);
     };
-    parseAtom() {
+    parseAtom(runtime: Runtime) {
         let token = this.shift();
         if (token.type === "string") return token;
         if (token.type === "number") return token;
         if (token.type === "operator") return token;
         if (token.type === "call") {
-            if (this.peek().type === "open") token.child = this.parseParen();
+            if (this.peek().type === "open") token.child = this.parseParen(runtime);
             return token;
         }
+        if (runtime.options.alwaysStrict === false) 
+        switch(token.type) {
+            case "open": return {value: "[", type: "string"};
+            case "close": return {value: "]", type: "string"};
+            case "newArg": return {value: ";", type: "string"};
+        }
+
         throw new Error(`Unexpected token of ${token.type} at ${token.pos}:${token.line}`)
     };
 }
