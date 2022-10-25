@@ -1,35 +1,27 @@
-import { FnHandler } from "./FnHandler";
-import { NodeIdentifier } from "./Nodes";
-import { Script } from "./Script";
+import { Environment } from "./Environment"
+import { TokenCall } from "./Lexer";
+type FnFunction = (ctx: Context) => any;
 
 class Context {
-    public constructor(public script:Script) {};
-    public async _callIdentifier(node: NodeIdentifier) {
-        const fn = this.script.env.get(node.value);
+    private _target: TokenCall = null;
+    public constructor(public fileName: string, public env: Environment) {}
+    callIdentifier(node: TokenCall) {
+        const fn = this.env.get(node.value);
+        let lastTarget = this._target;
+
         if (typeof fn === "function") {
-            const handler = new FnHandler(node, this);
-            return fn(handler);
+            this._target = node;
+            return (fn as FnFunction)(this);
         }
+        this._target = lastTarget;
         return fn;
     }
-    public mapValues(values: any[]) {
-        if (values.length > 1) {
-            return values.reduce((pv, v) => {
-                if (!pv) return v;
-                if (!isNaN(v) && !/\s/.test(v)) {
-                    if (isNaN(pv)) {
-                        pv = `${pv}${v}`;
-                    } else {
-                        pv = Number(`${pv}${v}`)
-                    }
-                } else {
-                    pv = `${pv}${v}`;
-                }
-                return pv;
-            }, null)
-        } else if (values.length > 0) {
-            return values[0];
-        } else null;
+    argsCheck(amount = 1) {
+        if (this._target.child.length < amount)
+            throw new Error(`Expected ${amount} arguments but got ${this._target.child.length}`)
+    }
+    getArgs(start = 0, end = 1) {
+        return this._target.child.slice(start, end+1)
     }
 }
 

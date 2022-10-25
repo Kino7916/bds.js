@@ -9,5 +9,9 @@
         "skipDefaultLibCheck": true,
         "skipLibCheck": true,
         "esModuleInterop": true
-    }
+    },
+    "exclude": [
+        "src_old",
+        "node_modules"
+    ]
 }

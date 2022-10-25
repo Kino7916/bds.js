@@ -1,136 +1,175 @@
-import { NodePosition } from "./Nodes";
+const SYNTAX = "[]\\;$";
+const OPS = RegExp("[" + "!=>w<".replace("w","") + "]");
+const FN_DEF = /[a-z_]/i;
 
-enum TOKEN_TYPE {
-    STRING,
-    NUMBER,
-    LPAREN,
-    RPAREN,
-    SEMI,
-    IDENTIFIER,
-    OP
-}
-
-class Token {
-    public constructor(public type: TOKEN_TYPE, public value: string) {}
-}
-
-const LETTERS = /[^a-z_0-9]/i;
-const SYNTAX = "[];$\\";
-const OPS = "!=><";
+type TokenString = {type: "string", value: string};
+type TokenNumber = {type: "number", value: number};
+type TokenCall = {type: "call", value: string, child: Token[]};
+type TokenOpen = {type: "open"};
+type TokenClose = {type: "close"};
+type TokenNewArg = {type: "newArg"};
+type TokenOperator = {type: "operator", value: "==" | "!=" | ">=" | "<=" | ">" | "<" | "!"};
+type TokenArgument = {type: "argument", child: Token[]};
+type TokenProgram = {type: "program", child: Token[]}
+type Token = {pos: number, line: number} & (TokenArgument| TokenProgram | TokenString | TokenNumber | TokenCall | TokenOpen |TokenClose | TokenNewArg | TokenOperator);
 
 class Lexer {
-    public pos: NodePosition;
-    public escape_c = false;
-    public constructor(public input: string) {}
+  public pos = 0;
+  public line = 0;
+  public col = 0;
+  public escape_c = false;
+  constructor(public input: string) {
+    if (typeof input !== "string" || !input)
+        throw new Error("input arg must be non-empty and typeof string!");
+  }
 
-    public main() {
-        this.pos = new NodePosition(0,0,0);
-        this.escape_c = false;
-        let tokens: Token[] = [];
-        while (!this.eof()) {
-            let token = this.process();
-            if (token) {
-                if (Array.isArray(token)) {
-                    tokens.push(...token);
-                } else tokens.push(token);
-            };
-        }
-        return tokens;
-    };
-    public next() {
-        let current = this.input[this.pos.idx++];
-        if (this.peek() === "\n") {this.pos.p = 0;this.pos.ln++}
-        else this.pos.p++;
-        return current;
+  main() {
+    const Tokens: Token[] = [];
+    while (true) {
+        let res = this.advance();
+        if (res) Tokens.push(res);
+        if (this.eof()) break;
     }
-    public peek(offset: number = 0) {
-        return this.input[this.pos.idx + offset]
-    }
-    public eof() {
-        return !this.peek();
-    }
-    public process() {
-        let char = this.peek();
-        let x = "";
-        if (this.escape_c) {
-            if (SYNTAX.indexOf(char) > -1) {
-                if (SYNTAX.indexOf(this.peek(1)) > -1) {
-                    this.next();
-                    this.escape_c = false;
-                    return new Token(TOKEN_TYPE.STRING, char);
-                } else {
-                    x += this.next();
-                }
-            }
-            else {
-                x += "\\" + this.next();
-            }
-            char = this.peek();
-            this.escape_c = false;
-        }
-        switch (char) {
-            case "[": this.next(); return new Token(TOKEN_TYPE.LPAREN, char);
-            case "]": this.next(); return new Token(TOKEN_TYPE.RPAREN, char);
-            case ";": this.next(); return new Token(TOKEN_TYPE.SEMI, char);
-            case "$": return this._makeId();
-            case "\\": this.next(); this.escape_c = true; return null;
-        }
+    return this.clean(Tokens);
+  }
 
-        if (OPS.indexOf(char) > -1) return this._makeOps();
+  peek(offset = 0) {
+    return this.input[this.pos + offset];
+  }
 
-        if (this.eof()) {
-            if (x) return new Token(TOKEN_TYPE.STRING, x);
-        } else {
-            let str = x + this._makeStr();
-            let arr: (string | number)[] = str.match(/\w+|\W+|\d+/g)
-            let arrt: Token[] = [];
-            while (arr.length > 0) {
-                let p = arr.shift() as any;
-                if (/\s/.test(p)) arrt.push(new Token(TOKEN_TYPE.STRING, p))
-                else
-                arrt.push(new Token(TOKEN_TYPE[isNaN(p) ? "STRING" : "NUMBER"], p))
-            }
-            return arrt;
-        }
+  next() {
+    let current = this.input[this.pos++];
+    if (this.peek() === "\n") {
+      this.line += 1;
+      this.col = 0
+    } else {
+      this.col += 1;
     }
-    public splitter(break_fn: (c: string) => boolean) {
-        let x = "";
-        while (true) {
-            if (this.eof()) break;
-            if (break_fn(this.peek()) && !this.escape_c) {
-                if (this.peek() === "\\") {
-                    this.escape_c = true;
-                    this.next();
-                    continue;
-                }
-                 else break;
-            }
-            if (this.escape_c) this.escape_c = false;
-            x += this.peek();
-            this.next();
-        }
-        return x;
+    return current;
+  }
+
+  eof() {
+    return this.peek() === "" || this.peek() === undefined;
+  }
+
+  isOperator(x: string) {
+    return OPS.test(x);
+  }
+
+  isSyntax(c: string) {
+    return SYNTAX.indexOf(c) > -1;
+  }
+
+  isNumber(x: string) {
+    return parseInt(x) === Number(x);
+  }
+
+  parseOperator(x: string): Token {
+    switch (x) {
+      case "==":
+      case "!=":
+      case ">=":
+      case "<=":
+      case "!":
+      case ">":
+      case "<": return {type: "operator", value: x, pos: this.col, line: this.line}
     }
-    public _makeId() {
-        const expr = (c: string) => (LETTERS.test(c));
+    return null;
+  }
+
+  validateCall(c: string) {
+    return FN_DEF.test(c);
+  }
+
+  parseCall(): Token {
+    const fn = this.readInput(this.validateCall);
+    if (!fn) return {type: "string", value:"$", pos: this.col, line: this.line};
+    return {type:"call", value:"$" + fn, child: [], pos: this.col, line: this.line}
+  }
+
+  validateString(c: string) {
+    return !(this.isSyntax(c) || this.isOperator(c));
+  }
+
+  parseString(): Token {
+    const str = this.readInput(this.validateString);
+    if (this.isNumber(str)) return {type: "number", value: Number(str), pos: this.col, line: this.line};
+    return {type: "string", value: str, pos: this.col, line: this.line};
+  }
+
+  readInput(validator: (c: string) => boolean) {
+    let str = "";
+    while (!this.eof() && validator.apply(this, [this.peek()])) {
+      str += this.next();
+    }
+    return str;
+  }
+
+  advance(): Token {
+    let c = this.peek();
+    if (this.escape_c) {
+      this.escape_c = false;
+      this.next();
+      if (this.isSyntax(c) || this.isOperator(c)) return {type: "string", value: c, pos: this.col, line: this.line};
+      return {type: "string", value: "\\" + c, pos: this.col, line: this.line};
+    }
+    switch (c) {
+      case "[": {this.next(); return {type: "open", pos: this.col, line: this.line}};
+      case "]": {this.next(); return {type: "close", pos: this.col, line: this.line}};
+      case ";": {this.next(); return {type: "newArg", pos: this.col, line: this.line}};
+      case "\\": {this.next();  this.escape_c = true; return void 0 };
+      case "$": {this.next(); return this.parseCall()};
+    }
+
+    if (this.isOperator(c)) {
         this.next();
-        const id = this.splitter(expr);
-        return new Token(TOKEN_TYPE.IDENTIFIER, id);
+        if (this.isOperator(c + this.peek(1))) return this.parseOperator(c + [this.next(), this.peek()].pop());
+        return this.parseOperator(c);
     }
-    public _makeStr() {
-        const expr = (c: string) => (SYNTAX.indexOf(c) > -1);
-        const str = this.splitter(expr);
-        return str;
+    return this.parseString();
+  }
+
+  clean(tokens: Token[]) {
+    let newArr: Token[] = [];
+    let token: Token;
+    let current: Token;
+    while (tokens.length > 0) {
+        token = tokens.shift();
+        if (!current) {current = token; continue;};
+        if (current.type === "string" && current.type === token.type) {
+            current.value += token.value;
+            continue;
+        } else {
+            if (current.type !== "string") {
+                newArr.push(current);
+                current = token;
+            } else {
+                if (token.type !== "string") {
+                    newArr.push(current);
+                    current = token;
+                } else throw new Error("dunno wat  to do")
+            }
+        }
     }
-    public _makeOps() {
-        const expr = (c:string) => (OPS.indexOf(c) > -1);
-        return new Token(TOKEN_TYPE.OP, this.splitter(expr));
-    }
+
+    if (current) newArr.push(current);
+    token = void 0;
+    current = void 0;
+
+    return newArr;
+  }
 }
 
 export {
     Lexer,
     Token,
-    TOKEN_TYPE,
-    LETTERS
+    TokenString,
+    TokenNumber,
+    TokenArgument,
+    TokenProgram,
+    TokenCall,
+    TokenOpen,
+    TokenClose,
+    TokenNewArg,
+    TokenOperator
 }
