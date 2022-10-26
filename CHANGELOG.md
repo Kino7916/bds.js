@@ -1,6 +1,6 @@
 ## Changelog Versions
 - [Changelog Versions](#changelog-versions)
-- [Latest v1.1.0](#latest-v110)
+- [Latest v1.1.1](#latest-v111)
   - [Added / New](#added--new)
   - [Breaking](#breaking)
 - [v1.0.10](#v1010)
@@ -9,7 +9,7 @@
 - [v1.0.9](#v109)
 - [v1.0.7](#v107)
 
-## Latest v1.1.0
+## Latest v1.1.1
 ### Added / New
 - Rewritten code for easy to use
 - Reworked `Context`
