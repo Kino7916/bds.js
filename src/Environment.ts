@@ -8,21 +8,42 @@ class Environment {
         if (parent && ! (parent instanceof Environment)) throw new Error("parent env must be instanceof Environment!")
     }
     public set(name: string, value: EnvFunction): any;
+    /**
+     * Sets a key-value into cache
+     * @param name 
+     * @param value 
+     * @returns 
+     */
     public set(name: string, value: any) {
         this.cache.set(name, value);
         return void 0;
     };
     public const() {};
+    /**
+     * Returns value by key from cache
+     * @param name 
+     * @returns 
+     */
     public get(name: string) {
         return this._recursiveGet(name);
     };
     private _get(name: string) {
         return (this.cache.has(name) ? this.cache.get(name) ?? null : void 0);
     }
+    /**
+     * Remove value by key from cache
+     * @param name 
+     * @returns 
+     */
     public remove(name: string) {
         return this.cache.delete(name);
     };
 
+    /**
+     * Recursively get from Environment to Environment
+     * @param name 
+     * @returns 
+     */
     private _recursiveGet(name: string) {
         let env = this as Environment;
         while (true) {

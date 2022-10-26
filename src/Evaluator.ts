@@ -1,11 +1,13 @@
 import { Context } from "./Context";
 import { Token, TokenArgument, TokenCall, TokenProgram} from "./Lexer";
 
-class EvaluatorImpl {
+class Evaluator {
+    static singleton = new Evaluator();
     public constructor() {}
-
-    evaluate(ast: TokenProgram, ctx: Context) {
-        return this.visitArgument(ast, ctx);
+    async evaluate(ast: TokenProgram, ctx: Context) {
+        const res = await this.visitArgument(ast, ctx);
+        if (ctx.options.trimOutput && typeof res === "string") return res.trim();
+        return res;
     }
     visit(node: Token, ctx: Context) {
         if (node.type === "string") return node.value;
@@ -18,7 +20,7 @@ class EvaluatorImpl {
     visitCall(node: TokenCall, ctx: Context) {
         return ctx.callIdentifier(node);
     };
-    async visitArgument(arg: TokenProgram | TokenArgument, ctx: Context) {
+    async visitArgument(arg: TokenProgram | TokenArgument, ctx: Context, map = true) {
         let arr = arg.child.copyWithin(-1, -1);
         let v = []
         while (arr.length > 0) {
@@ -26,16 +28,14 @@ class EvaluatorImpl {
             let res = await this.visit(node, ctx);
             v.push(res);
         }
-        return this.mapValues(v);
+        return map ? this.mapValues(v) : v;
     };
 
     async mapValues(values: any[]) {
-        if (values.length < 1) return values[0];
+        if (values.length <= 1) return values[0];
         return (await Promise.all(values.map(async v => String(await v)))).join('');
     }
 }
-const Evaluator = new EvaluatorImpl()
 export {
-    Evaluator,
-    EvaluatorImpl
+    Evaluator
 }

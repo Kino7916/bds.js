@@ -1,4 +1,4 @@
-import { Token, TokenProgram } from "./Lexer";
+import { Token, TokenArgument, TokenProgram, TokenString } from "./Lexer";
 import { Runtime } from "./Runtime";
 
 class Parser {
@@ -30,9 +30,9 @@ class Parser {
         return arr[arr.length -1]
     }
     readArgument(runtime: Runtime) {
-        let arr = [];
+        let arr: TokenArgument[] = [];
         let end = false;
-        let arg = {type: "argument", child: []}
+        let arg: TokenArgument = {type: "argument", child: []}
         this.shift();
         while (!this.eof()) {
             if (this.peek()?.type === "close") {
@@ -55,10 +55,10 @@ class Parser {
         if (end === false) throw new Error(`Expected ']', got none`)
         return arr;
     }
-    parseParen(runtime: Runtime): Token[] {
+    parseParen(runtime: Runtime): TokenArgument[] {
         return this.readArgument(runtime);
     };
-    parseAtom(runtime: Runtime) {
+    parseAtom(runtime: Runtime): Token {
         let token = this.shift();
         if (token.type === "string") return token;
         if (token.type === "number") return token;
@@ -69,9 +69,9 @@ class Parser {
         }
         if (runtime.options.alwaysStrict === false) 
         switch(token.type) {
-            case "open": return {value: "[", type: "string"};
-            case "close": return {value: "]", type: "string"};
-            case "newArg": return {value: ";", type: "string"};
+            case "open": return {value: "[", type: "string"} as Token;
+            case "close": return {value: "]", type: "string"} as Token;
+            case "newArg": return {value: ";", type: "string"} as Token;
         }
 
         throw new Error(`Unexpected token of ${token.type} at ${token.pos}:${token.line}`)

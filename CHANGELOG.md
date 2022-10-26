@@ -1,3 +1,29 @@
+## Changelog Versions
+- [Changelog Versions](#changelog-versions)
+- [Latest v1.1.0](#latest-v110)
+  - [Added / New](#added--new)
+  - [Breaking](#breaking)
+- [v1.0.10](#v1010)
+  - [Added / New](#added--new-1)
+  - [Deprecated](#deprecated)
+- [v1.0.9](#v109)
+- [v1.0.7](#v107)
+
+## Latest v1.1.0
+### Added / New
+- Rewritten code for easy to use
+- Reworked `Context`
+- Reworked `Lexer`
+- Reworked `Parser`
+- Added `Evaluator`
+- Added `Runtime`
+- Fixed `operator` type breaks punctuations
+- Readded some utility calls
+- Added `$async`, `$wait`, `$safejs`, `$if`
+### Breaking
+- Removed `FNHandler`
+- Removed `Script`
+- Removed `Nodes`
 ## v1.0.10
 ### Added / New
 - Added `Path`, `FileSystem` class

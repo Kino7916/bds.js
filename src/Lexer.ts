@@ -1,10 +1,10 @@
 const SYNTAX = "[]\\;$";
-const OPS = RegExp("[" + "!=>w<".replace("w","") + "]");
+const OPS = /[!=<>]+$/;
 const FN_DEF = /[a-z_]/i;
 
 type TokenString = {type: "string", value: string};
 type TokenNumber = {type: "number", value: number};
-type TokenCall = {type: "call", value: string, child: Token[]};
+type TokenCall = {type: "call", value: string, child: TokenArgument[]};
 type TokenOpen = {type: "open"};
 type TokenClose = {type: "close"};
 type TokenNewArg = {type: "newArg"};
@@ -70,11 +70,10 @@ class Lexer {
       case "!=":
       case ">=":
       case "<=":
-      case "!":
       case ">":
       case "<": return {type: "operator", value: x, pos: this.col, line: this.line}
     }
-    return null;
+    return {type: "string", value: x, pos: this.col, line: this.line};
   }
 
   validateCall(c: string) {
@@ -123,7 +122,7 @@ class Lexer {
 
     if (this.isOperator(c)) {
         this.next();
-        if (this.isOperator(c + this.peek(1))) return this.parseOperator(c + [this.next(), this.peek()].pop());
+        if (this.isOperator(c + this.peek())) return this.parseOperator(c + this.next());
         return this.parseOperator(c);
     }
     return this.parseString();
